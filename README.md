@@ -10,6 +10,9 @@ Securely protected by Bearer token authentication, this service acts as your per
 
 HeadLock acts as a highly optimized, single-instance connection-pooled Chromium service. Below is the step-by-step request-response workflow diagram:
 
+<details>
+<summary>🗺️ Show System Architecture & Workflow Diagram</summary>
+
 ```mermaid
 graph TD
     A["Vercel / Client Request"] -->|"POST /scrape/:type"| B("Auth Middleware")
@@ -29,6 +32,8 @@ graph TD
     M -->|"Success / Error"| N["Finally: releasePage"]
     N -->|"Close page & Dequeue"| O["Return JSON Response"]
 ```
+
+</details>
 
 ### Key Engineering Details
 1. **Shared Browser Pool**: Launches a single, persistent headless Chromium instance on startup rather than launching a new browser process for every request, reducing response times by up to **90%**.
