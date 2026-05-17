@@ -1,3 +1,8 @@
+---
+title: Headlock
+sdk: docker
+---
+
 # HeadLock 🔒
 
 A high-performance, private, self-hosted headless browser scraping API running Playwright (Chromium) inside a Docker container. Specially optimized for cost-free deployment on **Hugging Face Spaces** as a secure, personal alternative to services like Browserless.io.
