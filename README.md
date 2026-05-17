@@ -92,6 +92,12 @@ graph TD
    cp .env.example .env
    ```
    *Make sure `SECRET_TOKEN` is a strong, random key.*
+
+   > [!TIP]
+   > You can generate a strong, secure 32-byte hexadecimal secret token using the following command:
+   > ```bash
+   > openssl rand -hex 32
+   > ```
 3. **Install Chromium Drivers**:
    Ensure Chromium binaries are locally installed:
    ```bash
@@ -132,6 +138,10 @@ graph TD
 6. Hugging Face will automatically build and spin up the Docker container. Once complete, your scraper base URL will be:
    `https://<your-username>-<your-space-name>.hf.space`
 
+   > [!IMPORTANT]
+   > **Preventing Hugging Face Space Sleep (Keepalive Cron)**:
+   > Free Hugging Face Spaces automatically scale to zero (go to sleep) after 48 hours of inactivity. To prevent this cold start behavior and keep your connection pool warm, create a free account on [cron-job.org](https://cron-job.org/) and set up a daily task to ping your Space's public health endpoint (`https://<your-username>-<your-space-name>.hf.space/health`) once every 24 hours.
+
 ---
 
 ## ⚙️ Environment Variables
@@ -139,7 +149,8 @@ graph TD
 | Variable | Description | Default |
 | :--- | :--- | :--- |
 | `SECRET_TOKEN` | Bearer token required in the `Authorization` header to authenticate requests. | *(Required)* |
-| `MAX_CONCURRENT` | Maximum number of concurrent browser page instances. | `3` |
+| `MAX_CONCURRENT` | Maximum number of concurrent browser page instances (tabs). | `3` |
+| `MAX_QUEUE` | Maximum number of requests that can wait in the queue before being rejected with a `429` status code. | `10` |
 | `PAGE_TIMEOUT` | Max execution limit for any single scrape job in milliseconds. | `30000` |
 | `PORT` | Listening port for the Express application. | `7860` |
 
