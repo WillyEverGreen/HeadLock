@@ -23,3 +23,6 @@ Thumbs.db
 
 # Playwright binaries (since they are installed in user home or local cache)
 .playwright/
+
+# Local diagnostic scripts
+logs.js
