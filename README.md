@@ -139,8 +139,18 @@ graph TD
    `https://<your-username>-<your-space-name>.hf.space`
 
    > [!IMPORTANT]
-   > **Preventing Hugging Face Space Sleep (Keepalive Cron)**:
-   > Free Hugging Face Spaces automatically scale to zero (go to sleep) after 48 hours of inactivity. To prevent this cold start behavior and keep your connection pool warm, create a free account on [cron-job.org](https://cron-job.org/) and set up a daily task to ping your Space's public health endpoint (`https://<your-username>-<your-space-name>.hf.space/health`) once every 24 hours.
+   > **Preventing Hugging Face Space Sleep (Uptime Keepalive)**:
+   > Free Hugging Face Spaces scale to zero (go to sleep) after 48 hours of inactivity. When asleep, your first request will experience a 30-60 second container boot delay.
+   > 
+   > To keep your connection pool warm and running 24/7/365 permanently, configure a free monitor on **[UptimeRobot](https://uptimerobot.com/)**:
+   > 1. Register a free account on [UptimeRobot](https://uptimerobot.com/).
+   > 2. Click **Add New Monitor** and select monitor type **HTTP(S)**.
+   > 3. Set the **Friendly Name** (e.g., `HeadLock Keepalive`).
+   > 4. Set the **URL/IP** to: `https://<your-username>-<your-space-name>.hf.space/health` (Note: `/health` is a public endpoint and does not require credentials/tokens).
+   > 5. Set the **Monitoring Interval** to **Every 5 minutes** or **Every 15 minutes** (well under the 48-hour threshold).
+   > 6. Click **Create Monitor**.
+   > 
+   > This keeps the Space continuously hot and will instantly alert you if your service ever encounters issues.
 
 ---
 
