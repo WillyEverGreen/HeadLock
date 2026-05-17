@@ -170,15 +170,6 @@ graph TD
 
 All scraping requests require an `Authorization: Bearer <SECRET_TOKEN>` header and a JSON body.
 
-### 🚀 Quick Terminal Test (cURL)
-You can test the deployed or local scraper instantly from your command line:
-```bash
-curl -X POST https://<your-username>-<your-space-name>.hf.space/scrape/text \
-  -H "Authorization: Bearer your-super-secure-token-here" \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com"}'
-```
-
 ### Common Request Payload Attributes
 Any scraping endpoint accepts these custom inputs in the JSON payload:
 - `headers`: An object containing custom HTTP headers to pass along during navigation.
@@ -316,32 +307,142 @@ Monitor server uptime and browser pool statistics. Useful for standard Docker / 
 
 ## 🔌 Vercel / Next.js Integration
 
-To integrate this service inside your Vercel (Next.js) project, place the provided client helper file `lib/scraper.js` in your source directory.
+To integrate this service inside your Vercel (Next.js) project, implement the client helper and environment settings as outlined below.
 
-### Set Environment Variables in Vercel
+### 1. Set Environment Variables in Vercel
 In your Vercel dashboard, navigate to **Settings > Environment Variables** and add:
 - `SCRAPER_URL` = `https://<your-username>-<your-space-name>.hf.space`
 - `SCRAPER_TOKEN` = `your-super-secure-token-here`
 
-### Sample API Route Usage (Next.js Route Handlers)
+### 2. Client SDK Helper (`lib/scraper.js`)
+Save the following complete source code into `lib/scraper.js` in your Next.js project:
+
+```javascript
+/**
+ * HeadLock Scraper client wrapper for Next.js / Vercel projects.
+ * 
+ * Ready-to-use fetch wrapper for calling your private Hugging Face Space.
+ * Make sure to define SCRAPER_URL and SCRAPER_TOKEN in your Vercel environment.
+ * 
+ * @param {('html'|'text'|'screenshot'|'pdf'|'json')} type - Scrape action type.
+ * @param {Object} payload - Scrape configurations.
+ * @param {string} payload.url - Webpage URL to scrape.
+ * @param {string} [payload.waitFor] - For 'html': Wait for CSS selector to load.
+ * @param {string} [payload.selector] - For 'text': Extract text inside CSS selector (defaults to 'body').
+ * @param {boolean} [payload.fullPage] - For 'screenshot': Take a full page screenshot.
+ * @param {string} [payload.evaluate] - For 'json': Evaluate custom JS function string in page.
+ * @param {Object} [payload.headers] - Inject custom HTTP headers.
+ * @param {Array<Object>} [payload.cookies] - Inject session/auth cookies.
+ * 
+ * @returns {Promise<Object>} Response object containing output data and execution stats.
+ */
+export async function scrape(type, payload) {
+  const scraperUrl = process.env.SCRAPER_URL;
+  const scraperToken = process.env.SCRAPER_TOKEN;
+
+  if (!scraperUrl) {
+    throw new Error("SCRAPER_URL environment variable is missing on Vercel.");
+  }
+  if (!scraperToken) {
+    throw new Error("SCRAPER_TOKEN environment variable is missing on Vercel.");
+  }
+
+  // Ensure trailing slash is cleaned
+  const sanitizedUrl = scraperUrl.replace(/\/$/, "");
+
+  const res = await fetch(`${sanitizedUrl}/scrape/${type}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${scraperToken}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    let errMsg = `Server responded with ${res.status}`;
+    try {
+      const errJson = await res.json();
+      if (errJson.error) {
+        errMsg = errJson.error;
+      }
+    } catch (_) {}
+    
+    const error = new Error(errMsg);
+    error.status = res.status;
+    throw error;
+  }
+
+  return res.json();
+}
+```
+
+### 3. Advanced Usage & Error Recovery (Next.js Route Handler)
+Below is an advanced Next.js Route Handler demonstrating how to:
+1. Implement **automated retries with exponential backoff** for robust handling of `408 Timeout` and `429 Too Many Requests` (saturated queues).
+2. **Decode and render/download base64 screenshots and PDFs** returned by the scraper.
 
 ```javascript
 import { scrape } from '@/lib/scraper';
 import { NextResponse } from 'next/server';
 
+/**
+ * Robust Scraping Fetch Wrapper with Concurrency Backoff Retry Logic
+ */
+async function scrapeWithRetry(type, payload, maxRetries = 3, delayMs = 1500) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await scrape(type, payload);
+    } catch (error) {
+      const isRetryable = error.status === 408 || error.status === 429;
+      if (!isRetryable || attempt === maxRetries) {
+        throw error;
+      }
+      
+      console.warn(`[Scraper] Attempt ${attempt} failed (Status ${error.status}). Retrying in ${delayMs * attempt}ms...`);
+      await new Promise(res => setTimeout(res, delayMs * attempt)); // Exponential wait
+    }
+  }
+}
+
 export async function POST(req) {
   try {
-    const { url } = await req.json();
+    const { url, type } = await req.json();
 
-    // Call your private Hugging Face Space scraper securely
-    const data = await scrape('html', {
-      url,
-      waitFor: '.target-element'
-    });
+    if (type === 'screenshot') {
+      // 1. Fetch screenshot base64 payload with robust queue retry
+      const data = await scrapeWithRetry('screenshot', { url, fullPage: true });
+      
+      // Frontend consumption tip: Send as base64 data URL to render in an <img> tag instantly
+      const screenshotDataUrl = `data:image/png;base64,${data.screenshot}`;
+      return NextResponse.json({ success: true, image: screenshotDataUrl });
+    }
 
+    if (type === 'pdf') {
+      // 2. Fetch PDF base64 payload
+      const data = await scrapeWithRetry('pdf', { url });
+      
+      // Send the raw binary PDF file buffer back to the user for direct browser download/rendering
+      const pdfBuffer = Buffer.from(data.pdf, 'base64');
+      return new NextResponse(pdfBuffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="scraped-${Date.now()}.pdf"`
+        }
+      });
+    }
+
+    // 3. Fallback: Default HTML extraction
+    const data = await scrapeWithRetry('html', { url });
     return NextResponse.json({ success: true, html: data.html });
+
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('[API Router Error]:', error.message);
+    return NextResponse.json(
+      { success: false, error: error.message }, 
+      { status: error.status || 500 }
+    );
   }
 }
 ```
