@@ -10,11 +10,6 @@ Securely protected by Bearer token authentication, this service acts as your per
 
 HeadLock acts as a highly optimized, single-instance connection-pooled Chromium service. Below is the step-by-step request-response workflow diagram:
 
-![HeadLock Workflow](https://mermaid.ink/img/Z3JhcGggVEQKICAgIEFbIlZlcmNlbCAvIENsaWVudCBSZXF1ZXN0Il0gLS0+fCJQT1NUIC9zY3JhcGUvOnR5cGUifCBCKCJBdXRoIE1pZGRsZXdhcmUiKQogICAgQiAtLT58IlZhbGlkYXRlIEJlYXJlciBUb2tlbiJ8IEN7IkF1dGhvcml6ZWQ/In0KICAgIEMgLS0+fE5vfCBEWyJSZXR1cm4gNDAxLzQwMyBFcnJvciJdCiAgICBDIC0tPnxZZXN8IEVbIlNjcmFwZSBKb2IgV3JhcHBlciJdCiAgICBFIC0tPnwiQ2hlY2sgVGltZSBCdWRnZXQifCBGeyJUaW1lIExlZnQgPiAwPyJ9CiAgICBGIC0tPnxOb3wgR1siUmV0dXJuIDQwOCBUaW1lb3V0Il0KICAgIEYgLS0+fFllc3wgSFsiQnJvd3NlciBNYW5hZ2VyOiBhY3F1aXJlUGFnZSJdCiAgICBIIC0tPnwiUXVldWUgaWYgc2xvdHMgb2NjdXBpZWQifCBJeyJTbG90cyBBdmFpbGFibGU/In0KICAgIEkgLS0+fE5vfCBKWyJXYWl0IGluIFF1ZXVlIHdpdGggVGltZXIiXQogICAgSSAtLT58WWVzfCBLWyJDcmVhdGUgTmV3IFBhZ2UgU2xvdCJdCiAgICBKIC0tPnwiUXVldWUgVGltZW91dCJ8IEcKICAgIEogLS0+fCJTbG90IEZyZWVkInwgSwogICAgSyAtLT58IkFwcGx5IEhlYWRlcnMgJiBDb29raWVzInwgTFsiTmF2aWdhdGUgdG8gVVJMIl0KICAgIEwgLS0+fCJFeGVjdXRlIFJvdXRlIEhhbmRsZXIifCBNWyJTY3JhcGUgY29udGVudCAvIEFjdGlvbiJdCiAgICBNIC0tPnwiU3VjY2VzcyAvIEVycm9yInwgTlsiRmluYWxseTogcmVsZWFzZVBhZ2UiXQogICAgTiAtLT58IkNsb3NlIHBhZ2UgJiBEZXF1ZXVlInwgT1siUmV0dXJuIEpTT04gUmVzcG9uc2UiXQ==)
-
-<details>
-<summary>💻 View Mermaid Flowchart Source</summary>
-
 ```mermaid
 graph TD
     A["Vercel / Client Request"] -->|"POST /scrape/:type"| B("Auth Middleware")
@@ -34,8 +29,6 @@ graph TD
     M -->|"Success / Error"| N["Finally: releasePage"]
     N -->|"Close page & Dequeue"| O["Return JSON Response"]
 ```
-
-</details>
 
 ### Key Engineering Details
 1. **Shared Browser Pool**: Launches a single, persistent headless Chromium instance on startup rather than launching a new browser process for every request, reducing response times by up to **90%**.
