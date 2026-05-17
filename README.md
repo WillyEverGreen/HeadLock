@@ -170,6 +170,15 @@ graph TD
 
 All scraping requests require an `Authorization: Bearer <SECRET_TOKEN>` header and a JSON body.
 
+### 🚀 Quick Terminal Test (cURL)
+You can test the deployed or local scraper instantly from your command line:
+```bash
+curl -X POST https://<your-username>-<your-space-name>.hf.space/scrape/text \
+  -H "Authorization: Bearer your-super-secure-token-here" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com"}'
+```
+
 ### Common Request Payload Attributes
 Any scraping endpoint accepts these custom inputs in the JSON payload:
 - `headers`: An object containing custom HTTP headers to pass along during navigation.
