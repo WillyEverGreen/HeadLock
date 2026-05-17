@@ -9,6 +9,10 @@ A high-performance, private, self-hosted headless browser scraping API running P
 
 🛡️ **Bearer Token Protected** | ⚡ **~250ms Scrapes (Eager Warm-up)** | 📦 **Connection-Pooled & Leak-Proof**
 
+🔗 **[Live Demo Dashboard](https://willyevergreen-headlock.hf.space)** *(Public Status & Real-time Stats)*
+
+![HeadLock Dynamic Web Dashboard](dashboard.png)
+
 ---
 
 ## 🚀 Why HeadLock?
@@ -105,7 +109,7 @@ console.log(data.html);
 
 * **Runtime**: Node.js & Express
 * **Browser Automation**: Playwright (Chromium)
-* **Testing**: Jest & Supertest (100% test coverage)
+* **Testing**: Jest & Supertest (unit tested)
 * **DevOps**: Docker, Hugging Face Spaces
 
 ---
