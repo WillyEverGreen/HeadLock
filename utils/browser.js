@@ -13,6 +13,7 @@ class BrowserManager {
     this.activeSessions = 0;
     this.queue = [];
     this.maxConcurrent = parseInt(process.env.MAX_CONCURRENT, 10) || 3;
+    this.maxQueue = parseInt(process.env.MAX_QUEUE, 10) || 10;
   }
 
   /**
@@ -58,6 +59,14 @@ class BrowserManager {
    */
   async acquirePage(timeoutMs) {
     await this.init();
+
+    // Prevent memory leaks by rejecting requests early if the queue is saturated
+    if (this.queue.length >= this.maxQueue) {
+      console.warn(`[${new Date().toISOString()}] Peak queue limit reached (${this.maxQueue}). Rejecting request.`);
+      const queueErr = new Error(`Server is busy. Max concurrent scraping queue limit (${this.maxQueue}) exceeded.`);
+      queueErr.code = 'QUEUE_LIMIT_EXCEEDED';
+      throw queueErr;
+    }
 
     // If we have an available slot, spin up a new page immediately
     if (this.activeSessions < this.maxConcurrent) {

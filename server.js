@@ -8,6 +8,17 @@ const app = express();
 const PORT = parseInt(process.env.PORT, 10) || 7860;
 const startTime = Date.now();
 
+// CORS Middleware to support dynamic origins (e.g. Hugging Face Space URL renames)
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // 1. Parse JSON payloads (limit to 5mb in case custom options/cookies are large)
 app.use(express.json({ limit: '5mb' }));
 
@@ -47,10 +58,19 @@ app.use((err, req, res, next) => {
 });
 
 // 6. Start the server
-const server = app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`[${new Date().toISOString()}] Headlock Scraper Server running on http://0.0.0.0:${PORT}`);
   console.log(`[${new Date().toISOString()}] Concurrency limit: ${browserManager.maxConcurrent}`);
+  console.log(`[${new Date().toISOString()}] Max queue size: ${browserManager.maxQueue}`);
   console.log(`[${new Date().toISOString()}] Scraper operations timeout: ${process.env.PAGE_TIMEOUT || 30000}ms`);
+  
+  // Eager browser initialization (warm up Chromium to eliminate cold start launch penalty)
+  try {
+    await browserManager.init();
+    console.log(`[${new Date().toISOString()}] Browser pool warmed up eagerly. Chromium is ready.`);
+  } catch (err) {
+    console.error(`[${new Date().toISOString()}] Failed to warm up Chromium eagerly during startup:`, err.message);
+  }
 });
 
 // 7. Graceful Shutdown Handlers

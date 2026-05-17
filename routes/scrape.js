@@ -93,10 +93,20 @@ async function runScrapeJob(req, res, handler) {
   } catch (err) {
     const timeTaken = Date.now() - startTime;
     const isTimeout = err.name === 'TimeoutError' || err.message.includes('timeout') || err.code === 'TIMEOUT';
+    const isQueueLimit = err.code === 'QUEUE_LIMIT_EXCEEDED';
     
-    const statusCode = isTimeout ? 408 : 500;
-    const code = isTimeout ? 'TIMEOUT' : 'SCRAPE_ERROR';
-    const errorMsg = isTimeout ? "Request timed out during scraping operation" : err.message;
+    let statusCode = 500;
+    let code = 'SCRAPE_ERROR';
+    let errorMsg = err.message;
+
+    if (isTimeout) {
+      statusCode = 408;
+      code = 'TIMEOUT';
+      errorMsg = "Request timed out during scraping operation";
+    } else if (isQueueLimit) {
+      statusCode = 429;
+      code = 'QUEUE_LIMIT_EXCEEDED';
+    }
 
     // Log the error to stdout with timestamp as requested
     console.error(`[${new Date().toISOString()}] Error scraping "${url}":`, err.stack || err.message);

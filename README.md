@@ -115,8 +115,9 @@ graph TD
    * **Secrets (Encrypted)**:
      * `SECRET_TOKEN` = `your-super-secure-token-here`
    * **Variables**:
-     * `MAX_CONCURRENT` = `3`
-     * `PAGE_TIMEOUT` = `30000` *(Max timeout in milliseconds)*
+     * `MAX_CONCURRENT` = `3` *(Max number of browser tabs running concurrently)*
+     * `MAX_QUEUE` = `10` *(Max request queue size to prevent memory pileups)*
+     * `PAGE_TIMEOUT` = `30000` *(Max timeout in milliseconds for a scraping job)*
 5. Push the project repository to your Hugging Face Space repository:
    ```bash
    git init
