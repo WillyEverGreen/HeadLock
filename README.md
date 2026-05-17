@@ -11,8 +11,6 @@ A high-performance, private, self-hosted headless browser scraping API running P
 
 🔗 **[Live Demo Dashboard](https://willyevergreen-headlock.hf.space)** *(Public Status & Real-time Stats)*
 
-![HeadLock Dynamic Web Dashboard](dashboard.png)
-
 ---
 
 ## 🚀 Why HeadLock?
