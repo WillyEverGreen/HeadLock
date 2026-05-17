@@ -36,20 +36,23 @@ graph TD
 </details>
 
 ### Key Engineering Details
-1. **Shared Browser Pool**: Launches a single, persistent headless Chromium instance on startup rather than launching a new browser process for every request, reducing response times by up to **90%**.
-2. **Intelligent Queueing**: Regulates active tabs using a strict concurrency threshold (`MAX_CONCURRENT`). Over-capacity requests are held in an asynchronous queue and dispatched immediately when slots become available.
+1. **Shared Browser Pool & Eager Warm-Up**: Launches a single, persistent headless Chromium instance eagerly during server startup. This eliminates cold starts and first-request browser launch delays, reducing response times by up to **90%**.
+2. **Intelligent Queueing & Memory Safeguards**: Regulates active tabs using a strict concurrency threshold (`MAX_CONCURRENT`). Over-capacity requests are held in an asynchronous queue up to a maximum safety limit (`MAX_QUEUE`). Saturated queues reject incoming requests immediately with a `429 Too Many Requests` code to prevent server memory exhaustion.
 3. **Budgeted Timeouts**: Computes remaining time during queue waits. If a request sits in the queue too long, it is safely canceled and a `408 Request Timeout` is returned, preventing resource leaks.
 4. **Auto-Recovery**: Automatically listens for browser disconnects or crashes, flushing old queues gracefully and spinning up a healthy Chromium instance on subsequent calls.
+5. **CORS & Dynamic Space Support**: Wildcard CORS configuration allows secure requests from dynamic Vercel deployments and resolves origin changes gracefully if your Hugging Face Space is renamed.
 
 ---
 
 ## ✨ Features
 
 * **Single Shared Instance**: Re-uses one Playwright Chromium instance to minimize container startup time and overhead.
-* **Connection Queue Pool**: Limits max concurrent browser pages (default `3`). Excess requests are safely queued.
+* **Eager Initialization**: Chromium is launched eagerly on server boot to remove any launch latency from the request path.
+* **Connection Queue Pool**: Limits max concurrent browser pages (default `3`). Excess requests are safely queued up to `MAX_QUEUE` (default `10`).
+* **Rate Limiting / Backpressure**: Saturated queues are cleanly rejected early with standard `429 Too Many Requests` responses.
 * **Anti-Leak Safeguards**: Page cleanup is automatically performed in a `finally` block under all circumstances (even on navigation errors or timeout budgets).
 * **Docker Ready**: Tailored specifically for Hugging Face Spaces Docker specifications (UID 1000 user, port 7860, and cached Playwright system binaries).
-* **Vercel Friendly**: Fully compatible with Vercel serverless environments; includes a ready-to-use fetch client wrapper.
+* **Dynamic CORS Ingress**: Fully supports wildcard CORS preflights to let Vercel serverless functions consume the server easily under any domain.
 * **Robust Error Contexts**: Transparent error messages, mapped HTTP status codes, and execution timings returned on every response.
 
 ---
