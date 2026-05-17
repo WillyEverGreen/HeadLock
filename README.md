@@ -1,3 +1,13 @@
+---
+title: Headlock
+emoji: 🔒
+colorFrom: red
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # HeadLock 🔒
 Private self-hosted headless browser API. Playwright + Express on Hugging Face Spaces.
 Free alternative to Browserless.io for personal use.
