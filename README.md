@@ -1,7 +1,3 @@
----
-title: Headlock
-sdk: docker
----
 <div align="center">
 
 <img src="docs/icon.svg" width="110" alt="HeadLock logo" />
