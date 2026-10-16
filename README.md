@@ -13,6 +13,12 @@ A high-performance, private, self-hosted headless browser scraping API running P
 
 ---
 
+## Screenshots
+
+**Public status dashboard**
+
+![Public status dashboard](docs/screenshots/headlock-home.png)
+
 ## 🚀 Why HeadLock?
 
 Running headless Chromium inside serverless functions (like Vercel) causes massive bundle size inflation, slow cold-starts, and CPU limits. Running it on commercial platforms is expensive.
