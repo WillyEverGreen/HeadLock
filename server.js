@@ -35,6 +35,15 @@ app.get('/health', (req, res) => {
   });
 });
 
+const FAVICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0b1020"/><path d="M22 28v-6a10 10 0 0 1 20 0v6" fill="none" stroke="#60a5fa" stroke-width="5" stroke-linecap="round"/><rect x="15" y="28" width="34" height="26" rx="6" fill="#60a5fa"/><circle cx="32" cy="39" r="4" fill="#0b1020"/><rect x="30" y="41" width="4" height="8" rx="2" fill="#0b1020"/></svg>';
+
+// Favicon (browsers request /favicon.ico automatically)
+app.get(['/favicon.ico', '/favicon.svg'], (req, res) => {
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(FAVICON_SVG);
+});
+
 // 2.5. Root Landing Page (Public - serves a gorgeous, portfolio-ready HTML dashboard)
 app.get('/', (req, res) => {
   res.setHeader('Content-Type', 'text/html');
@@ -44,6 +53,7 @@ app.get('/', (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HeadLock | Headless Browser API</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
