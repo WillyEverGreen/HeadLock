@@ -2,22 +2,21 @@
 title: Headlock
 sdk: docker
 ---
+<div align="center">
 
-# HeadLock 🔒
+<img src="docs/icon.svg" width="110" alt="HeadLock logo" />
 
-A high-performance, private, self-hosted headless browser scraping API running Playwright (Chromium) inside a Docker container. Specially optimized for cost-free deployment on **Hugging Face Spaces** as a secure, personal alternative to services like Browserless.io.
+# HeadLock
 
-🛡️ **Bearer Token Protected** | ⚡ **~250ms Scrapes (Eager Warm-up)** | 📦 **Connection-Pooled & Leak-Proof**
+**Self-hosted headless browser API for scraping, screenshots and PDFs, free on Hugging Face Spaces.**
 
-🔗 **[Live Demo Dashboard](https://willyevergreen-headlock.hf.space)** *(Public Status & Real-time Stats)*
+<a href="https://willyevergreen-headlock.hf.space"><img src="https://img.shields.io/badge/Live_Demo-Open_the_app-2ea44f?style=for-the-badge" alt="Live demo" /></a>
 
----
+<br/>
 
-## Screenshots
+<img src="docs/screenshot.png" width="860" alt="HeadLock screenshot" />
 
-**Public status dashboard**
-
-![Public status dashboard](docs/screenshots/headlock-home.png)
+</div>
 
 ## 🚀 Why HeadLock?
 
